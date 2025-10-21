@@ -1,0 +1,79 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    
+    "users": {
+      ".read": true,
+      ".indexOn": ["email"],
+      "$uid": {
+        ".write": "!data.exists() || auth.uid == $uid"
+      }
+    },
+    
+    "farmers": {
+      ".read": true,
+      "$farmerId": {
+        ".read": true,
+        "profile": {
+          ".read": true,
+          ".write": "auth != null && auth.uid == $farmerId"
+        },
+        "orders": {
+          ".read": "auth != null && auth.uid == $farmerId",
+          "$orderId": {
+            ".write": "auth != null"
+          }
+        }
+      }
+    },
+    
+    "organizations": {
+      ".read": "auth != null && root.child('users/' + auth.uid + '/role').val() == 'organization'",
+      "$orgId": {
+        ".read": "auth != null && (auth.uid == $orgId || root.child('users/' + auth.uid + '/role').val() == 'organization')",
+        ".write": "auth != null && auth.uid == $orgId",
+        "profile": {
+          ".read": "auth != null",
+          ".write": "auth != null && auth.uid == $orgId"
+        },
+        "orders": {
+          ".read": "auth != null && auth.uid == $orgId",
+          "$orderId": {
+            ".write": "auth != null && auth.uid == $orgId"
+          }
+        },
+        "subscriptions": {
+          ".read": "auth != null && auth.uid == $orgId",
+          "$subId": {
+            ".write": "auth != null && auth.uid == $orgId"
+          }
+        },
+        "deliveries": {
+          ".read": "auth != null && auth.uid == $orgId",
+          "$deliveryId": {
+            ".write": "auth != null && auth.uid == $orgId"
+          }
+        }
+      }
+    },
+    
+    "products": {
+      ".read": true,
+      ".indexOn": ["farmerId", "category", "isActive"],
+      "$productId": {
+        ".read": true,
+        ".write": "auth != null && (!data.exists() && newData.child('farmerId').val() == auth.uid || data.exists() && data.child('farmerId').val() == auth.uid)",
+        ".validate": "newData.hasChildren(['name', 'category', 'price', 'unit', 'stock', 'description', 'farmerId', 'isActive'])"
+      }
+    },
+    
+    "orders": {
+      ".read": "auth != null",
+      "$orderId": {
+        ".read": "auth != null",
+        ".write": "auth != null"
+      }
+    }
+  }
+}

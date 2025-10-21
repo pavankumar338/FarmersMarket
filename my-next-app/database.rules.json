@@ -1,0 +1,44 @@
+{
+  "rules": {
+    "users": {
+      "$uid": {
+        ".read": "$uid === auth.uid",
+        ".write": "$uid === auth.uid"
+      }
+    },
+    "products": {
+      ".read": "auth != null",
+      "$productId": {
+        ".write": "auth != null && (!data.exists() || data.child('farmerId').val() === auth.uid)"
+      }
+    },
+    "farmers": {
+      "$farmerId": {
+        ".read": "auth != null && ($farmerId === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'organization')",
+        "orders": {
+          "$orderId": {
+            ".read": "auth != null",
+            ".write": "auth != null && ($farmerId === auth.uid || data.child('organizationId').val() === auth.uid || !data.exists())"
+          }
+        },
+        "$other": {
+          ".write": "$farmerId === auth.uid"
+        }
+      }
+    },
+    "organizations": {
+      "$organizationId": {
+        ".read": "auth != null && $organizationId === auth.uid",
+        "orders": {
+          "$orderId": {
+            ".read": "auth != null && $organizationId === auth.uid",
+            ".write": "auth != null && ($organizationId === auth.uid || data.child('farmerId').val() === auth.uid || !data.exists())"
+          }
+        },
+        "$other": {
+          ".write": "$organizationId === auth.uid"
+        }
+      }
+    }
+  }
+}
