@@ -9,19 +9,20 @@ import { signInAnonymously, signInWithCustomToken } from "firebase/auth"
 import RoleGuard from "@/components/RoleGuard"
 import { 
   Package, ShoppingCart, TrendingUp, Users, Plus, Upload, Edit2, Trash2, 
-  Check, X, Truck, CheckCircle, Clock, AlertCircle, Search, Download,
+  Check, X, Truck, CheckCircle, Clock, AlertCircle, Search,
   BarChart3, Calendar, DollarSign, Leaf, Filter, Eye
 } from "lucide-react"
+
+import type { Product } from "@/types/product"
 
 function FarmerDashboardContent() {
   const { data: session, status } = useSession()
   const userId = session?.user?.id
   const userName = session?.user?.name || "Farmer"
-  const userImage = (session?.user as any)?.image as string | undefined
+  const userImage = session?.user?.image as string | undefined
   const [activeTab, setActiveTab] = useState<"products" | "orders" | "analytics">("products")
   const [errorMsg, setErrorMsg] = useState<string>("")
 
-  type Product = { id: string; name: string; category: string; price: number; stock: number; unit: string }
   const [products, setProducts] = useState<Product[]>([])
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
   const [productSearchTerm, setProductSearchTerm] = useState("")
@@ -36,7 +37,7 @@ function FarmerDashboardContent() {
         if (!res.ok) throw new Error("Failed to get custom token")
         const { token } = await res.json()
         await signInWithCustomToken(auth, token)
-      } catch (e) {
+      } catch {
         if (!auth.currentUser) {
           try { await signInAnonymously(auth) } catch { /* noop */ }
         }
@@ -46,10 +47,10 @@ function FarmerDashboardContent() {
 
     const productsRef = ref(database, `products`)
     const unsub = onValue(productsRef, (snap) => {
-      const val = (snap.val() || {}) as Record<string, any>
+      const val = (snap.val() || {}) as Record<string, unknown>
       const list: Product[] = Object.entries(val)
-        .filter(([_, value]) => value.farmerId === userId)
-        .map(([key, value]) => ({ id: key, ...value }))
+        .filter(([, value]) => (value as unknown as Product).farmerId === userId)
+        .map(([key, value]) => ({ ...(value as unknown as Product), id: key }))
       setProducts(list)
       setFilteredProducts(list)
     })
@@ -138,7 +139,7 @@ function FarmerDashboardContent() {
     const headers = lines[0].split(",").map(h => h.trim())
     return lines.slice(1).map(line => {
       const values = line.split(",").map(v => v.trim())
-      const obj: any = {}
+      const obj: Record<string, string> = {}
       headers.forEach((h, i) => { obj[h] = values[i] })
       return obj
     })
@@ -171,8 +172,8 @@ function FarmerDashboardContent() {
         })
       }))
       setCsvSuccess(`Successfully uploaded ${products.length} products!`)
-    } catch (err: any) {
-      setCsvError("Failed to upload CSV: " + err.message)
+    } catch (err) {
+      setCsvError("Failed to upload CSV: " + (err instanceof Error ? err.message : "Unknown error"))
     }
     setCsvUploading(false)
   }
@@ -225,7 +226,7 @@ function FarmerDashboardContent() {
         farmerId: userId,
       })
       setErrorMsg("")
-    } catch (err) {
+    } catch {
       setErrorMsg("Failed to save product. Check Firebase Database rules and connectivity.")
       return
     }
@@ -253,7 +254,7 @@ function FarmerDashboardContent() {
         farmerId: userId,
       })
       setErrorMsg("")
-    } catch (err) {
+    } catch {
       setErrorMsg("Failed to update product. Check Firebase Database rules and connectivity.")
       return
     }
@@ -271,7 +272,7 @@ function FarmerDashboardContent() {
     try {
       await remove(productRef)
       setErrorMsg("")
-    } catch (err) {
+    } catch {
       setErrorMsg("Failed to delete product. Check Firebase Database rules and connectivity.")
     }
   }
@@ -290,7 +291,7 @@ function FarmerDashboardContent() {
         await set(r, { ...p, createdAt: Date.now(), farmerId: userId })
       }))
       setErrorMsg("")
-    } catch (e) {
+    } catch {
       setErrorMsg("Failed to seed products. Check Firebase Database rules and connectivity.")
     }
   }
@@ -319,6 +320,7 @@ function FarmerDashboardContent() {
             </div>
             <div className="flex items-center space-x-6">
               {userImage && (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img src={userImage} alt="Profile" className="w-10 h-10 rounded-full border-2 border-white/50 shadow-lg" />
               )}
               <div className="text-right">

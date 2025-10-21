@@ -8,11 +8,11 @@ import { UpdateProductInput } from '@/types/product'
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const productId = params.id
-    const product = await getProduct(productId)
+    const { id } = await params
+    const product = await getProduct(id)
 
     if (!product) {
       return NextResponse.json(
@@ -40,10 +40,10 @@ export async function GET(
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const productId = params.id
+    const { id } = await params
     const body = await request.json()
 
     const updates: UpdateProductInput = {}
@@ -57,7 +57,7 @@ export async function PUT(
     if (body.image !== undefined) updates.image = body.image
     if (body.isActive !== undefined) updates.isActive = body.isActive
 
-    await updateProduct(productId, updates)
+    await updateProduct(id, updates)
 
     return NextResponse.json({
       success: true,
@@ -78,14 +78,14 @@ export async function PUT(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const productId = params.id
+    const { id } = await params
     const { searchParams } = new URL(request.url)
     const hardDelete = searchParams.get('hard') === 'true'
 
-    await deleteProduct(productId, hardDelete)
+    await deleteProduct(id, hardDelete)
 
     return NextResponse.json({
       success: true,

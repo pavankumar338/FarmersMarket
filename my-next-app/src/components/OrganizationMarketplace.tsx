@@ -21,7 +21,7 @@ export default function OrganizationMarketplace() {
       const grouped: { [farmerId: string]: Product[] } = {};
       const farmerMap: { [farmerId: string]: { id: string; name: string; avatar?: string } } = {};
       const avatarPool = ['/avatar.svg'];
-      products.forEach((product, idx) => {
+      products.forEach((product) => {
         if (product.isActive === false) return;
         if (!grouped[product.farmerId]) grouped[product.farmerId] = [];
         grouped[product.farmerId].push(product);
@@ -103,6 +103,7 @@ export default function OrganizationMarketplace() {
               }}
             >
               <div style={{ position: 'relative', marginBottom: 8 }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={farmer.avatar && farmer.avatar.length > 0 ? farmer.avatar : '/avatar.svg'}
                   alt={farmer.name}
@@ -132,6 +133,7 @@ export default function OrganizationMarketplace() {
           <div className="product-list" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 28, marginBottom: 32 }}>
             {productsByFarmer[selectedFarmer].map((product: Product) => (
               <div key={product.id} style={{ border: '1px solid #eee', borderRadius: 14, padding: 18, background: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', transition: 'box-shadow 0.2s', position: 'relative' }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={product.image || '/product.svg'}
                   alt={product.name}

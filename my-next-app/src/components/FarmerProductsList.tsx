@@ -23,11 +23,11 @@ export default function FarmerProductsList() {
     const unsubscribe = onValue(productsRef, (snapshot) => {
       const all = snapshot.val() || {};
       const myProducts = Object.entries(all)
-        .filter(([_, p]: any) => p.farmerId === farmerId)
-        .map(([id, p]: any) => ({ id, ...p }));
+        .filter(([, p]) => (p as Product).farmerId === farmerId)
+        .map(([id, p]) => ({ ...(p as Product), id }));
       setProducts(myProducts);
       setLoading(false);
-    }, (err) => {
+    }, () => {
       setError('Error fetching products');
       setLoading(false);
     });
@@ -38,8 +38,7 @@ export default function FarmerProductsList() {
     try {
       await update(ref(database, `products/${productId}`), { isActive: !currentStatus });
       // Local state will update via onValue
-    } catch (err) {
-      console.error('Error toggling product status:', err);
+    } catch {
       alert('Failed to update product status');
     }
   };
@@ -126,7 +125,7 @@ export default function FarmerProductsList() {
       {/* Products List */}
       {products.length === 0 ? (
         <div className="bg-white rounded-lg shadow p-12 text-center">
-          <p className="text-gray-500 text-lg mb-4">You haven't added any products yet</p>
+          <p className="text-gray-500 text-lg mb-4">You haven&apos;t added any products yet</p>
           <Link
             href="/farmer/products/add"
             className="inline-block bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 font-medium"

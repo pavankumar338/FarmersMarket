@@ -7,10 +7,11 @@ import { getProductsByCategory } from '@/lib/productService'
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { category: string } }
+  { params }: { params: Promise<{ category: string }> }
 ) {
   try {
-    const category = decodeURIComponent(params.category)
+    const { category: categoryParam } = await params
+    const category = decodeURIComponent(categoryParam)
     const products = await getProductsByCategory(category)
 
     return NextResponse.json({

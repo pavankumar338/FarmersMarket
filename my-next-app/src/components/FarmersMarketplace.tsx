@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react"
 import { database } from "@/lib/firebase"
 import { ref, get } from "firebase/database"
-import Link from "next/link"
 import OrderRequestModal from "./OrderRequestModal"
 
 interface Farmer {
@@ -283,7 +282,7 @@ export default function FarmersMarketplace() {
                 <ol className="text-sm text-blue-800 list-decimal list-inside space-y-1">
                   <li>Sign in as a farmer</li>
                   <li>Go to farmer dashboard</li>
-                  <li>Click "Seed Sample Products" or add products manually</li>
+                  <li>Click &quot;Seed Sample Products&quot; or add products manually</li>
                   <li>Come back here to browse them</li>
                 </ol>
               </div>

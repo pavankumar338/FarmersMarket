@@ -14,9 +14,9 @@ function OrganizationDashboardContent() {
   const { data: session, status } = useSession()
   const userId = session?.user?.id
   const userName = session?.user?.name || "Farmer"
-  const userImage = (session?.user as any)?.image as string | undefined
+  const userImage = session?.user?.image as string | undefined
   const [activeTab, setActiveTab] = useState<"products" | "orders" | "analytics">("products")
-  const [errorMsg, setErrorMsg] = useState<string>("")
+  const [errorMsg] = useState<string>("")
 
   type Product = { 
     id: string; 
@@ -44,8 +44,6 @@ function OrganizationDashboardContent() {
     return acc
   }, {} as Record<string, { products: Product[]; name: string; email: string }>);
 
-  const [selectedFarmerId, setSelectedFarmerId] = useState<string | null>(null);
-
   useEffect(() => {
     async function ensureFirebaseAuth() {
       try {
@@ -55,7 +53,7 @@ function OrganizationDashboardContent() {
         if (!res.ok) throw new Error("Failed to get custom token")
         const { token } = await res.json()
         await signInWithCustomToken(auth, token)
-      } catch (e) {
+      } catch {
         if (!auth.currentUser) {
           try { await signInAnonymously(auth) } catch { /* noop */ }
         }
@@ -65,10 +63,10 @@ function OrganizationDashboardContent() {
 
     const productsRef = ref(database, `products`)
     const unsub = onValue(productsRef, (snap) => {
-      const val = (snap.val() || {}) as Record<string, any>
+      const val = (snap.val() || {}) as Record<string, unknown>
       const list: Product[] = Object.entries(val)
-        .filter(([_, value]) => value.isActive !== false)
-        .map(([key, value]) => ({ id: key, ...value }))
+        .filter(([, value]) => (value as unknown as Product).isActive !== false)
+        .map(([key, value]) => ({ ...(value as unknown as Product), id: key }))
       setProducts(list)
     })
     return () => unsub()
@@ -127,6 +125,7 @@ function OrganizationDashboardContent() {
             <div className="flex items-center space-x-6">
               <div className="flex items-center space-x-3 bg-white/10 backdrop-blur-sm px-5 py-3 rounded-xl border border-white/20">
                 {userImage && (
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img src={userImage} alt="Profile" className="w-10 h-10 rounded-full border-2 border-white shadow-lg" />
                 )}
                 <div className="text-right">
@@ -215,7 +214,7 @@ function OrganizationDashboardContent() {
               <div className="text-5xl group-hover:scale-110 transition-transform">🌾</div>
             </div>
             <div className="text-5xl font-black text-white mb-2">
-              {new Set(products.map(p => (p as any).farmerId || "")).size}
+              {new Set(products.map(p => p.farmerId || "")).size}
             </div>
             <div className="text-orange-100 text-sm font-medium">Active farmers</div>
           </div>
@@ -334,7 +333,7 @@ function OrganizationDashboardContent() {
                     ].map(({ key, label, color }) => (
                       <button
                         key={key}
-                        onClick={() => setOrderFilter(key as any)}
+                        onClick={() => setOrderFilter(key as "all" | "pending" | "confirmed" | "in_transit" | "delivered" | "rejected")}
                         className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all transform hover:scale-105 ${
                           orderFilter === key
                             ? `bg-gradient-to-r from-${color}-600 to-${color}-700 text-white shadow-lg`
@@ -602,7 +601,7 @@ function OrganizationDashboardContent() {
                       <div className="space-y-3">
                         {Object.entries(
                           products.reduce((acc, p) => {
-                            const farmer = (p as any).farmerName || "Unknown Farmer";
+                            const farmer = p.farmerName || "Unknown Farmer";
                             acc[farmer] = (acc[farmer] || 0) + 1;
                             return acc;
                           }, {} as Record<string, number>)

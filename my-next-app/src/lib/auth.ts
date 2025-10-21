@@ -3,7 +3,7 @@ import { NextAuthOptions, User } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import bcrypt from "bcryptjs"
 import { database } from "@/lib/firebase"
-import { ref, push, set, get, query, orderByChild, equalTo, update, child } from "firebase/database"
+import { ref, push, set, get, query, orderByChild, equalTo, update } from "firebase/database"
 import { adminDb } from "@/lib/firebaseAdmin"
 
 type AppUser = { id: string; email: string; password?: string; name: string; role: "farmer" | "organization" }

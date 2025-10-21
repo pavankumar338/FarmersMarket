@@ -7,10 +7,10 @@ import { getProductsByFarmer } from '@/lib/productService'
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { farmerId: string } }
+  { params }: { params: Promise<{ farmerId: string }> }
 ) {
   try {
-    const farmerId = params.farmerId
+    const { farmerId } = await params
     const products = await getProductsByFarmer(farmerId)
 
     return NextResponse.json({

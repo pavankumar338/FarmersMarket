@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 
 export default function Home() {
   return (
@@ -13,7 +14,7 @@ export default function Home() {
             </span>
           </div>
           <div className="flex space-x-8 items-center">
-            <a href="/" className="text-gray-700 hover:text-green-600 transition-colors font-medium">Home</a>
+            <Link href="/" className="text-gray-700 hover:text-green-600 transition-colors font-medium">Home</Link>
             <a href="/auth/signin" className="text-green-700 font-semibold hover:text-green-800 transition-colors">Sign In</a>
             <a 
               href="/auth/register" 

@@ -414,7 +414,7 @@ export default function EnhancedOrganizationMarketplace() {
             <div className="text-8xl mb-6">👨‍🌾</div>
             <h3 className="text-3xl font-bold text-gray-900 mb-4">Select a Farmer to Browse Products</h3>
             <p className="text-lg text-gray-600 mb-2">Choose a farmer from the cards above to see their available products</p>
-            <p className="text-sm text-gray-500">You can also select "All Farmers" to browse all products at once</p>
+            <p className="text-sm text-gray-500">You can also select &quot;All Farmers&quot; to browse all products at once</p>
           </div>
         ) : selectedFarmer.id === "all" ? (
           <div className="space-y-8">
